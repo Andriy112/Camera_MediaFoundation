@@ -16,19 +16,14 @@ int main() {
 	Camera cam;
 	try
 	{
-		
-		cam.capture_photo(&_bytes,&type,&len);
-		if (&type == &MFVideoFormat_NV12)
-		{
-			ofstream fs;
-			fs.open("_out_.yuv",ofstream::binary);
-			fs.write((char*)_bytes, len);
-			fs.close();
-		}		
+		cam.capture_photo(&_bytes,&len);
+		FILE* fp = fopen("filename.yuv", "wb");
+		fwrite(_bytes,1,len,fp);
+		fclose(fp);
 	}
 	catch (const std::exception& e)
 	{
-		printf("%s",e.what());
+		cout << e.what()<<"\n";
 	}
 	return 0;
 }

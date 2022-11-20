@@ -22,14 +22,13 @@ struct Resolution
 {
 	int height, width;
 };
-
-
-
+//Simple camera handler  
 class Camera
 {
 private:
 	IMFSourceReader* source_reader;
 	IMFMediaSource* currmediaSource;
+protected:
 	//returns device name
 	wchar_t* next_camera_device(_In_ int _dev_index);
 	int prepare();
@@ -40,7 +39,7 @@ public:
 	Camera();
 	Camera(int);
 	//returns frame of NV12 format
-	int capture_photo(bytes const*, GUID*, int*);
+	VOID capture_photo(bytes const*, int*);
 };
 int Camera::prepare()
 {
@@ -51,7 +50,7 @@ int Camera::prepare()
 	MFGetAttributeSize(media_type, MF_MT_FRAME_SIZE, (uint32_t*)&res_ptr->width, (uint32_t*)&res_ptr->height);
 	return !media_type;
 }
-int Camera::capture_photo(_Out_ bytes const* buff, _Out_ GUID* vid_frmt_subtype, _Out_ int* len)
+void Camera::capture_photo(_Out_ bytes const* buff, _Out_ int* len)
 {
 	IMFMediaBuffer* mediaBuffer;
 	IMFSample* sample = nullptr;
@@ -61,7 +60,7 @@ int Camera::capture_photo(_Out_ bytes const* buff, _Out_ GUID* vid_frmt_subtype,
 	{
 		if (streamFlags == MF_SOURCE_READERF_ERROR)
 		{
-			return -1;
+			throw "Error ocurred when readsample is executing";
 		}
 		source_reader->ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0, &streamIndex, &streamFlags, &timeStamp, &sample);
 	}
@@ -74,7 +73,6 @@ int Camera::capture_photo(_Out_ bytes const* buff, _Out_ GUID* vid_frmt_subtype,
 	mediaBuffer = nullptr;
 	sample->Release();
 	sample = nullptr;
-	return 1;
 }
 wchar_t* Camera::next_camera_device(_In_ int _dev_index)
 {
