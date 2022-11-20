@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include "camera.h"
+#include "exception"
 using namespace std;
 
 
@@ -11,6 +12,7 @@ using namespace std;
 
 int main() {
 	int len;
+	GUID type;
 	bytes _bytes;
 	try
 	{

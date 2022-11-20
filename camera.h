@@ -11,6 +11,7 @@
 #include <mfobjects.h>
 #include <mferror.h>
 #include <mfreadwrite.h>
+#include <exception>
 using namespace std;
 
 typedef byte* bytes;
@@ -22,7 +23,8 @@ struct Resolution
 {
 	int height, width;
 };
-//Simple camera handler  
+//Simple camera handler
+//Use try .. catch to see errors
 class Camera
 {
 private:
@@ -31,14 +33,13 @@ private:
 protected:
 	//returns device name
 	wchar_t* next_camera_device(_In_ int _dev_index);
-	int prepare();
+	virtual int prepare();
 public:
 	string name;
 	Resolution* res_ptr;
 	/*init default object of camera*/
 	Camera();
 	Camera(int);
-	//returns frame of NV12 format
 	VOID capture_photo(bytes const*, int*);
 };
 int Camera::prepare()
@@ -48,6 +49,13 @@ int Camera::prepare()
 	MFCreateSourceReaderFromMediaSource(currmediaSource, NULL, &source_reader);
 	source_reader->GetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM, &media_type);
 	MFGetAttributeSize(media_type, MF_MT_FRAME_SIZE, (uint32_t*)&res_ptr->width, (uint32_t*)&res_ptr->height);
+	media_type->SetGUID(MF_MT_SUBTYPE, MFVideoFormat_NV12);
+	if (source_reader->SetCurrentMediaType(MF_SOURCE_READER_FIRST_VIDEO_STREAM,nullptr,media_type) != S_OK)
+	{
+		throw runtime_error("Format NV12 is not supported\nPlease override method <YourCamera>::prepare()");
+		return 0;
+	}
+
 	return !media_type;
 }
 void Camera::capture_photo(_Out_ bytes const* buff, _Out_ int* len)
@@ -60,7 +68,7 @@ void Camera::capture_photo(_Out_ bytes const* buff, _Out_ int* len)
 	{
 		if (streamFlags == MF_SOURCE_READERF_ERROR)
 		{
-			throw "Error ocurred when readsample is executing";
+			throw runtime_error("Error ocurred when readsample is executing");
 		}
 		source_reader->ReadSample(MF_SOURCE_READER_FIRST_VIDEO_STREAM, 0, &streamIndex, &streamFlags, &timeStamp, &sample);
 	}
