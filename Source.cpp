@@ -12,7 +12,7 @@ using namespace std;
 
 int main() {
 	int len;
-	GUID type;
+	
 	bytes _bytes;
 	try
 	{
