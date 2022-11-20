@@ -11,11 +11,10 @@ using namespace std;
 
 int main() {
 	int len;
-	GUID type;
 	bytes _bytes;
-	Camera cam;
 	try
 	{
+		Camera cam;
 		cam.capture_photo(&_bytes,&len);
 		FILE* fp = fopen("filename.yuv", "wb");
 		fwrite(_bytes,1,len,fp);
